@@ -13,6 +13,8 @@ enum {
 	SEEK_END,
 };
 
+int fsinit();
+
 int open(const char *pathname, int flags);
 int close(int fd);
 ssize_t read(int fd, void *buf, size_t count);

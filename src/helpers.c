@@ -1,3 +1,9 @@
+#include <stddef.h>
+#include <stdint.h.h>
+#include <posix-file.h>
+#include <peripheral.h>
+#include <fat.h>
+
 static int _fat_read_sd(uint32_t sector, uint8_t *data) {
 	SDStreamStatus status;
 	
