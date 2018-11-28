@@ -1,8 +1,11 @@
 #include <stddef.h>
-#include <stdint.h.h>
+#include <stdint.h>
 #include <posix-file.h>
 #include <peripheral.h>
+#include <sd.h>
 #include <fat.h>
+
+uint8_t fat_buf[512];
 
 static int _fat_read_sd(uint32_t sector, uint8_t *data) {
 	SDStreamStatus status;
@@ -11,7 +14,7 @@ static int _fat_read_sd(uint32_t sector, uint8_t *data) {
 	
 	sd_stream_read_block(&status, sector);
 	if(status == SD_STREAM_STATUS_FAILED) {
-		printf("sd_stream_read_block failed at SD_STREAM_STATUS_BEGIN\n");
+		//printf("sd_stream_read_block failed at SD_STREAM_STATUS_BEGIN\n");
 		return -1;
 	}
 	
@@ -19,7 +22,7 @@ static int _fat_read_sd(uint32_t sector, uint8_t *data) {
 		*data++ = sd_stream_read_block(&status);
 	
 	if(status == SD_STREAM_STATUS_FAILED) {
-		printf("sd_stream_read_block failed\n");
+		//printf("sd_stream_read_block failed\n");
 		return -1;
 	}
 	

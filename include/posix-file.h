@@ -7,6 +7,9 @@
 #define	O_RDONLY		1
 #define	O_RDWR			(O_RDONLY | O_WRONLY)
 
+typedef long ssize_t; 
+typedef long off_t; 
+
 enum {
 	SEEK_SET,
 	SEEK_CUR,
