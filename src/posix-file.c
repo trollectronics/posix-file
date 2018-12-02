@@ -1,6 +1,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <posix-file.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <mem.h>
 #include <fat.h>
 
