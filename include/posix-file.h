@@ -1,14 +1,13 @@
 #ifndef POSIX_FILE_H_
 #define POSIX_FILE_H_
 
+#include <stdlib.h>
+
 #define	MAX_FD_OPEN		4
 
 #define	O_WRONLY		2
 #define	O_RDONLY		1
 #define	O_RDWR			(O_RDONLY | O_WRONLY)
-
-typedef long ssize_t; 
-typedef long off_t; 
 
 enum {
 	SEEK_SET,
