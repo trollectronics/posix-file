@@ -36,12 +36,23 @@ int closedir(DIR *dirp) {
 struct dirent *readdir(DIR *dirp) {
 	Dir *dir = dirp;
 	
-	if(!fat_dirlist(dir->dirname, &dir->fatdir, 1, dir->index))
-		return NULL;
-	
-	dir->d.d_off = dir->index;
-	strcpy(dir->d.d_name, dir->fatdir.filename);
-	dir->index++;
+	for(;;) {
+		if(!fat_dirlist(dir->dirname, &dir->fatdir, 1, dir->index))
+			return NULL;
+		
+		if(dir->fatdir.attrib & 0x8) {
+			dir->index++;
+			continue;
+		} else if(dir->fatdir.attrib & 0x10) {
+			dir->d.d_type = DT_DIR;
+		} else {
+			dir->d.d_type = DT_REG;
+		}
+		
+		dir->d.d_off = dir->index;
+		strcpy(dir->d.d_name, dir->fatdir.filename);
+		dir->index++;
+	}
 	
 	return &dir->d;
 }
