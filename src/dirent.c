@@ -52,6 +52,7 @@ struct dirent *readdir(DIR *dirp) {
 		dir->d.d_off = dir->index;
 		strcpy(dir->d.d_name, dir->fatdir.filename);
 		dir->index++;
+		break;
 	}
 	
 	return &dir->d;
