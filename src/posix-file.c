@@ -125,7 +125,7 @@ off_t lseek(int fd, off_t offset, int whence) {
 		return -1;
 
 	switch (whence) {
-		case SEEK_START:
+		case SEEK_SET:
 			file[fd].seek_offset = offset;
 			break;
 		case SEEK_CUR:
@@ -137,7 +137,7 @@ off_t lseek(int fd, off_t offset, int whence) {
 	}
 
 	if (file[fd].seek_offset < file[fd].size) {
-		fat_seek(fd, file[fd].seek_offset & ~0x1FF)
+		fat_seek(fd, file[fd].seek_offset & ~0x1FF);
 		uint8_t *b = file[fd].buf;
 		fat_read_sect(fd);
 		uint32_t *src = (uint32_t *) fat_buf;
