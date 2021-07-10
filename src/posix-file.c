@@ -121,6 +121,8 @@ ssize_t write(int fd, const void *buf, size_t count) {
 }
 
 off_t lseek(int fd, off_t offset, int whence) {
+	size_t i;
+
 	if(!file[fd].open)
 		return -1;
 
