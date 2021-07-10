@@ -120,7 +120,33 @@ ssize_t write(int fd, const void *buf, size_t count) {
 	return -1;
 }
 
-off_t lseek() {
-	return (off_t) -1;
+off_t lseek(int fd, off_t offset, int whence) {
+	if(!file[fd].open)
+		return -1;
+
+	switch (whence) {
+		case SEEK_START:
+			file[fd].seek_offset = offset;
+			break;
+		case SEEK_CUR:
+			file[fd].seek_offset += offset;
+			break;
+		case SEEK_END:
+			file[fd].seek_offset = file[fd].size + offset;
+			break;
+	}
+
+	if (file[fd].seek_offset < file[fd].size) {
+		fat_seek(fd, file[fd].seek_offset & ~0x1FF)
+		uint8_t *b = file[fd].buf;
+		fat_read_sect(fd);
+		uint32_t *src = (uint32_t *) fat_buf;
+		for(i = 0; i < 512/4; i++) {
+			*((uint32_t *) b) = *src++;
+			b += 4;
+		}
+	}
+
+	return (off_t) file[fd].seek_offset;
 }
 
