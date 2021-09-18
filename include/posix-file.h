@@ -2,8 +2,9 @@
 #define POSIX_FILE_H_
 
 #include <stdlib.h>
+#include <sys/types.h>
 
-#define	MAX_FD_OPEN		4
+#define	MAX_FD_OPEN		32
 
 #define	O_WRONLY		2
 #define	O_RDONLY		1
