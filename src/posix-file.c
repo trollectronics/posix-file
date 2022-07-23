@@ -12,6 +12,7 @@
 typedef struct FileDescriptor FileDescriptor;
 struct FileDescriptor {
 	bool open;
+	int fat_fd;
 	size_t seek_offset;
 	size_t size;
 	uint8_t buf[512];
@@ -26,24 +27,38 @@ int open(const char *pathname, int flags) {
 	char fatname[namelen + 1];
 	int i;
 	int fd;
+	int fat_fd;
 	
 	for(i = 0; i < namelen + 1; i++) {
 		fatname[i] = toupper(pathname[i]);
 	}
-	
-	if((fd = fat_open(fatname, flags)) < 0)
-		return -1;
-	
-	file[fd].open = true;
-	file[fd].seek_offset = 0;
-	file[fd].size = fat_fsize(fd);
-	
-	return fd;
+
+	for (fd = 0; fd < MAX_FD_OPEN; fd++) {
+		if (!file[fd].open) {
+			if((fat_fd = fat_open(fatname, flags)) < 0)
+				return -1;
+			
+			file[fd].fat_fd = fat_fd;
+			file[fd].open = true;
+			file[fd].seek_offset = 0;
+			file[fd].size = fat_fsize(fd);
+
+			return fd;
+		}
+	}
+
+	/* Out of file descriptors */
+	return -1;
 }
 
 int close(int fd) {
+	if (!file[fd].open) {
+		return -1;
+	}
+
 	file[fd].open = false;
-	fat_close(fd);
+	fat_close(file[fd].fat_fd);
+
 	return 0;
 }
 
@@ -59,6 +74,8 @@ ssize_t read(int fd, void *buf, size_t count) {
 	if(file[fd].seek_offset >= file[fd].size)
 		return 0;
 	
+	int fat_fd = file[fd].fat_fd;
+
 	r = MIN(count, (file[fd].size - file[fd].seek_offset));
 	
 	a = buf;
@@ -81,7 +98,7 @@ ssize_t read(int fd, void *buf, size_t count) {
 	
 	/* Full sectors*/
 	while(count >= 512) {
-		fat_read_sect(fd);
+		fat_read_sect(fat_fd);
 		uint32_t *src = (uint32_t *) fat_buf;
 		for(i = 0; i < 512/4; i++) {
 			*((uint32_t *) a) = *src++;
@@ -97,7 +114,7 @@ ssize_t read(int fd, void *buf, size_t count) {
 	/* New partial sector */
 	if(count) {
 		b = file[fd].buf;
-		fat_read_sect(fd);
+		fat_read_sect(fat_fd);
 		uint32_t *src = (uint32_t *) fat_buf;
 		for(i = 0; i < 512/4; i++) {
 			*((uint32_t *) b) = *src++;
@@ -139,9 +156,11 @@ off_t lseek(int fd, off_t offset, int whence) {
 	}
 
 	if (file[fd].seek_offset < file[fd].size) {
-		fat_seek(fd, file[fd].seek_offset & ~0x1FF);
+		int fat_fd = file[fd].fat_fd;
+
+		fat_seek(fat_fd, file[fd].seek_offset & ~0x1FF);
 		uint8_t *b = file[fd].buf;
-		fat_read_sect(fd);
+		fat_read_sect(fat_fd);
 		uint32_t *src = (uint32_t *) fat_buf;
 		for(i = 0; i < 512/4; i++) {
 			*((uint32_t *) b) = *src++;
