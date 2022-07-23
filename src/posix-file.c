@@ -41,7 +41,7 @@ int open(const char *pathname, int flags) {
 			file[fd].fat_fd = fat_fd;
 			file[fd].open = true;
 			file[fd].seek_offset = 0;
-			file[fd].size = fat_fsize(fd);
+			file[fd].size = fat_fsize(fat_fd);
 
 			return fd;
 		}
