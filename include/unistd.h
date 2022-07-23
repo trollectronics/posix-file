@@ -1,6 +1,8 @@
 #ifndef UNISTD_H_
 #define UNISTD_H_
 
+#include <sys/types.h>
+
 enum {
 	SEEK_SET,
 	SEEK_CUR,
